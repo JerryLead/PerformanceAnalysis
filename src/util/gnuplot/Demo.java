@@ -45,8 +45,8 @@ public class Demo {
             path = args[0];
         }
 
-        simple();
-        //simple3D();
+        //simple();
+        simple3D();
         //defaultTerminal(path);
         //EPSTerminal(path);
         //SVGTerminal(path);

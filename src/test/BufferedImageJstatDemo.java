@@ -17,7 +17,7 @@ public class BufferedImageJstatDemo {
 	public static void main(String[] args) {
 		JFrame jframe = new JFrame();
 		jframe.add(new ImagePanel4());
-		jframe.setSize(640 * 3, 480 * 3);
+		jframe.setSize(800, 600);
 		jframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		jframe.setVisible(true);
 	}
@@ -45,6 +45,8 @@ class ImagePanel4 extends JPanel {
 		imageList.add(JstatMetricsImage.plotOldGen(metricsList));
 		imageList.add(JstatMetricsImage.plotPermGen(metricsList));
 		imageList.add(JstatMetricsImage.plotGC(metricsList));
+		imageList.add(JstatMetricsImage.plotGCCount(metricsList));
+		imageList.add(JstatMetricsImage.plotOldGenAndGC(metricsList));
 	
 		
 		
@@ -56,10 +58,10 @@ class ImagePanel4 extends JPanel {
 	@Override
 	public void paintComponent(Graphics g) {
 		
-		g.drawImage(imageList.get(1), 0, 0, null);	
-		g.drawImage(imageList.get(0), 640, 0, null);
-		g.drawImage(imageList.get(2), 0, 480, null);
-		g.drawImage(imageList.get(3), 640, 480, null);
+		g.drawImage(imageList.get(0), 0, 0, null);	
+		//g.drawImage(imageList.get(6), 20, 20, null);
+		//g.drawImage(imageList.get(2), 0, 480, null);
+		//g.drawImage(imageList.get(3), 640, 480, null);
 		
 		
 		

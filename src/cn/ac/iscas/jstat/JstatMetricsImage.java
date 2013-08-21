@@ -34,6 +34,7 @@ public class JstatMetricsImage {
 	 * 325835.7 32512.0 31872.0 23155.4  0.0   108608.0 47624.0   315584.0   149325.8  193664.0 184174.3    542   11.467  13     13.135   24.603
 	 * 325837.7 32512.0 31872.0 23155.4  0.0   108608.0 47624.0   315584.0   149325.8  193664.0 184174.3    542   11.467  13     13.135   24.603
 	 */
+	@SuppressWarnings("resource")
 	public static List<ArrayList<String>> parse(File jstatFile) {
 		List<ArrayList<String>> listlist = new ArrayList<ArrayList<String>>();
 		try {
@@ -101,10 +102,7 @@ public class JstatMetricsImage {
 
         GenericDataSet dataSet = new GenericDataSet(true);
         dataSet.addAll(list);
-        
-        
-             
-       
+
         DataSetPlot plot = new DataSetPlot(dataSet);
         plot.set("using", "1:4");   
         //plot.set("using", "1:4:(" + rgb(50,204,50) + ")");   
@@ -142,17 +140,19 @@ public class JstatMetricsImage {
         
         p.set("style", "fill transparent solid 1.0 noborder");
   
-        //PNGTerminal t = new PNGTerminal();  
+        PNGTerminal t = new PNGTerminal();  
+        /*
         PostscriptTerminal t = new PostscriptTerminal(System.getProperty("user.home") +
                 System.getProperty("file.separator") + "Desktop/Old.eps");
         t.setColor(true);
         t.set("solid");
+        */
         p.setTerminal(t);   
         p.setPersist(false);
         p.plot();
         
-        //return t.getImage();
-        return null;
+        return t.getImage();
+        //return null;
 	}
 	
 	//Timestamp OGCMN OGCMX OC OU	PGCMN PGCMX PC PU	YGC YGCT FGC FGCT GCT	NGCMN NGCMX NGC S0C S1C S0U S1U EC EU
@@ -221,24 +221,30 @@ public class JstatMetricsImage {
 	
 	//Timestamp OGCMN OGCMX OC OU	PGCMN PGCMX PC PU	YGC YGCT FGC FGCT GCT	NGCMN NGCMX NGC S0C S1C S0U S1U EC EU
 	public static BufferedImage plotGC(List<ArrayList<String>> list) {
+
 		JavaPlot p = new JavaPlot();
    
-        p.setTitle("GC Counts and corresponding Time Cost");
-        p.getAxis("x").setLabel("Time (sec)");//, "Arial", 20);
+        p.setMultiTitle("GC Counts and corresponding Time Cost");
+        //p.getAxis("x").setLabel("Time (sec)");//, "Arial", 20);
         //p.getAxis("y").setLabel("Count");
-        p.getAxis("y").setLabel("GC Time Cost (sec)");
-        
+       
         p.set("xdata", "time");
 		p.set("timefmt", "'%H:%M:%S'");
 		p.set("xtics", "nomirror");	
 		p.set("format", "x '%M:%S'");
 		p.set("style", "data lines");
 		
+		p.set("lmargin", "9");
         p.setKey(JavaPlot.Key.TOP_RIGHT);
+        p.getAxis("y").setLabel("GC Count");
         
+        StripeLayout lo = new StripeLayout();
+		lo.setColumns(1); 
+        p.getPage().setLayout(lo);
+     
         GenericDataSet dataSet = new GenericDataSet(true);
         dataSet.addAll(list);
-
+        
        
         DataSetPlot plot = new DataSetPlot(dataSet);
         /*
@@ -258,23 +264,23 @@ public class JstatMetricsImage {
         p.set("ytics", "nomirror");
         p.set("y2tics", "");
         */
-        
         plot = new DataSetPlot(dataSet);
-        plot.setTitle("YGCT");
+        plot.setTitle("YGC");
         plot.getPlotStyle().setStyle(Style.LINES);
-        plot.set("using", "1:11");
+        plot.getPlotStyle().setLineType(3);
         plot.getPlotStyle().setLineWidth(2);
-        //plot.set("axis x1y2");
-        p.addPlot(plot);     
-        
-        plot = new DataSetPlot(dataSet);
-        plot.setTitle("FGCT");
-        plot.set("using", "1:13");
-        plot.getPlotStyle().setStyle(Style.LINES);
-        plot.getPlotStyle().setLineWidth(2);
-        //plot.getPlotStyle().setLineType(7);
-        //plot.set("axis x1y2");
+        plot.set("using", "1:10");
         p.addPlot(plot);
+           
+        plot = new DataSetPlot(dataSet);
+        plot.setTitle("FGC");
+        plot.getPlotStyle().setStyle(Style.LINES);
+        plot.getPlotStyle().setLineType(1);
+        plot.getPlotStyle().setLineWidth(3);
+        //plot.getPlotStyle().set("lc", "rgb 'blue'");
+        plot.set("using", "1:12");
+        p.addPlot(plot);
+        
         /*
         plot = new DataSetPlot(dataSet);
         plot.setTitle("GCT");
@@ -286,30 +292,56 @@ public class JstatMetricsImage {
         p.addPlot(plot);
         */
         //p.set("style", "fill transparent solid 0.2 noborder");
+        p.newGraph();
+       
+        p.getAxis("y").setLabel("GC Time Cost (sec)");
+        
+        plot = new DataSetPlot(dataSet);
+        plot.setTitle("YGCT");
+        plot.getPlotStyle().setStyle(Style.LINES);
+        plot.set("using", "1:11");
+        plot.getPlotStyle().setLineType(3);
+        plot.getPlotStyle().setLineWidth(2);
+        //plot.set("axis x1y2");
+        p.addPlot(plot);     
+        
+        plot = new DataSetPlot(dataSet);
+        plot.setTitle("FGCT");
+        plot.set("using", "1:13");
+        plot.getPlotStyle().setStyle(Style.LINES);
+        plot.getPlotStyle().setLineWidth(2);
+        plot.getPlotStyle().setLineType(1);
+        //plot.set("axis x1y2");
+        p.addPlot(plot);
+       
+        
+        p.set("style", "fill transparent solid 1.0 noborder");
         
         //PNGTerminal t = new PNGTerminal(900, 480);  
-        //PNGTerminal t = new PNGTerminal();  
+        PNGTerminal t = new PNGTerminal();  
+        /*
         PostscriptTerminal t = new PostscriptTerminal(System.getProperty("user.home") +
                 System.getProperty("file.separator") + "Desktop/GC.eps");
         t.setColor(true);
         t.set("solid");
+        */
         p.setTerminal(t);   
         p.setPersist(false);
         
         p.plot();
         
-        //return t.getImage();
-        return null;
+        return t.getImage();
+        //return null;
 	}
 	
 	//Timestamp OGCMN OGCMX OC OU	PGCMN PGCMX PC PU	YGC YGCT FGC FGCT GCT	NGCMN NGCMX NGC S0C S1C S0U S1U EC EU
-		public static BufferedImage plotGCCount(List<ArrayList<String>> list) {
+		public static BufferedImage plotGC2(List<ArrayList<String>> list) {
 			JavaPlot p = new JavaPlot();
 	   
-	        p.setTitle("GC Counts");
+	        p.setTitle("GC Counts and corresponding Time Cost");
 	        p.getAxis("x").setLabel("Time (sec)");//, "Arial", 20);
 	        //p.getAxis("y").setLabel("Count");
-	        p.getAxis("y").setLabel("GC Count");
+	        p.getAxis("y").setLabel("GC Time Cost (sec)");
 	        
 	        p.set("xdata", "time");
 			p.set("timefmt", "'%H:%M:%S'");
@@ -317,28 +349,47 @@ public class JstatMetricsImage {
 			p.set("format", "x '%M:%S'");
 			p.set("style", "data lines");
 			
-	        p.setKey(JavaPlot.Key.TOP_LEFT);
+	        p.setKey(JavaPlot.Key.TOP_RIGHT);
 	        
 	        GenericDataSet dataSet = new GenericDataSet(true);
 	        dataSet.addAll(list);
 
 	       
 	        DataSetPlot plot = new DataSetPlot(dataSet);
-	       
-	        plot.setTitle("YGC");
-	        plot.getPlotStyle().setStyle(Style.LINESPOINTS);
+	        /*
+	        plot.setTitle("Young GC");
+	        plot.getPlotStyle().setStyle(Style.IMPULSES);
 	        plot.set("using", "1:10");
 	        p.addPlot(plot);
 	           
 	        plot = new DataSetPlot(dataSet);
-	        plot.setTitle("FGC");
-	        plot.getPlotStyle().setStyle(Style.LINESPOINTS);
-	        plot.getPlotStyle().setLineType(3);
+	        plot.setTitle("Full GC");
+	        plot.getPlotStyle().setStyle(Style.BOXES);
 	        plot.set("using", "1:12");
 	        p.addPlot(plot);
-	
+		
+	  
+	        p.set("y2label", "'Time Cost (sec)'");
+	        p.set("ytics", "nomirror");
+	        p.set("y2tics", "");
+	        */
 	        
-	     
+	        plot = new DataSetPlot(dataSet);
+	        plot.setTitle("YGCT");
+	        plot.getPlotStyle().setStyle(Style.LINES);
+	        plot.set("using", "1:11");
+	        plot.getPlotStyle().setLineWidth(2);
+	        //plot.set("axis x1y2");
+	        p.addPlot(plot);     
+	        
+	        plot = new DataSetPlot(dataSet);
+	        plot.setTitle("FGCT");
+	        plot.set("using", "1:13");
+	        plot.getPlotStyle().setStyle(Style.LINES);
+	        plot.getPlotStyle().setLineWidth(2);
+	        //plot.getPlotStyle().setLineType(7);
+	        //plot.set("axis x1y2");
+	        p.addPlot(plot);
 	        /*
 	        plot = new DataSetPlot(dataSet);
 	        plot.setTitle("GCT");
@@ -352,19 +403,85 @@ public class JstatMetricsImage {
 	        //p.set("style", "fill transparent solid 0.2 noborder");
 	        
 	        //PNGTerminal t = new PNGTerminal(900, 480);  
-	        //PNGTerminal t = new PNGTerminal();  
+	        PNGTerminal t = new PNGTerminal();  
+	        /*
 	        PostscriptTerminal t = new PostscriptTerminal(System.getProperty("user.home") +
 	                System.getProperty("file.separator") + "Desktop/GC.eps");
 	        t.setColor(true);
 	        t.set("solid");
+	        */
 	        p.setTerminal(t);   
 	        p.setPersist(false);
 	        
 	        p.plot();
 	        
-	        //return t.getImage();
-	        return null;
+	        return t.getImage();
+	        //return null;
 		}
+		
+	//Timestamp OGCMN OGCMX OC OU	PGCMN PGCMX PC PU	YGC YGCT FGC FGCT GCT	NGCMN NGCMX NGC S0C S1C S0U S1U EC EU
+	public static BufferedImage plotGCCount(List<ArrayList<String>> list) {
+		JavaPlot p = new JavaPlot();
+   
+        p.setTitle("GC Counts");
+        p.getAxis("x").setLabel("Time (sec)");//, "Arial", 20);
+        //p.getAxis("y").setLabel("Count");
+        p.getAxis("y").setLabel("GC Count");
+        
+        p.set("xdata", "time");
+		p.set("timefmt", "'%H:%M:%S'");
+		p.set("xtics", "nomirror");	
+		p.set("format", "x '%M:%S'");
+		p.set("style", "data lines");
+		
+        p.setKey(JavaPlot.Key.TOP_LEFT);
+        
+        GenericDataSet dataSet = new GenericDataSet(true);
+        dataSet.addAll(list);
+
+       
+        DataSetPlot plot = new DataSetPlot(dataSet);
+       
+        plot.setTitle("YGC");
+        plot.getPlotStyle().setStyle(Style.LINESPOINTS);
+        plot.set("using", "1:10");
+        p.addPlot(plot);
+           
+        plot = new DataSetPlot(dataSet);
+        plot.setTitle("FGC");
+        plot.getPlotStyle().setStyle(Style.LINESPOINTS);
+        plot.getPlotStyle().setLineType(3);
+        plot.set("using", "1:12");
+        p.addPlot(plot);
+
+        /*
+        plot = new DataSetPlot(dataSet);
+        plot.setTitle("GCT");
+        plot.set("using", "1:14");
+        plot.getPlotStyle().setStyle(Style.LINES);
+        //plot.getPlotStyle().setLineWidth(2);
+        //plot.getPlotStyle().setLineType(7);
+        plot.set("axis x1y2");
+        p.addPlot(plot);
+        */
+        //p.set("style", "fill transparent solid 0.2 noborder");
+        
+        //PNGTerminal t = new PNGTerminal(900, 480);  
+        PNGTerminal t = new PNGTerminal();  
+        /*
+        PostscriptTerminal t = new PostscriptTerminal(System.getProperty("user.home") +
+                System.getProperty("file.separator") + "Desktop/GC.eps");
+        t.setColor(true);
+        t.set("solid");
+        */
+        p.setTerminal(t);   
+        p.setPersist(false);
+        
+        p.plot();
+        
+        return t.getImage();
+        //return null;
+	}	
 	
 	//Timestamp OGCMN OGCMX OC OU	PGCMN PGCMX PC PU	YGC YGCT FGC FGCT GCT	NGCMN NGCMX NGC S0C S1C S0U S1U EC EU
 	public static BufferedImage plotSurvivorSpace(List<ArrayList<String>> list) {
@@ -377,7 +494,7 @@ public class JstatMetricsImage {
 		p.set("format", "x '%M:%S'");
 		p.setKey(Key.TOP_RIGHT);
 		
-        p.setMultiTitle("Survivor Space (S0 and S1) Heap Memory Usage");
+        p.setMultiTitle("Memory Usage of Survivor Space (S0 and S1)");
         //p.getAxis("x").setLabel("Time (sec)");//, "Arial", 20);
         p.getAxis("y").setLabel("Memory (MB)");
 
@@ -421,17 +538,19 @@ public class JstatMetricsImage {
         plot.getPlotStyle().setLineType(3);
         p.addPlot(plot);
         
-        //PNGTerminal t = new PNGTerminal();  
+        PNGTerminal t = new PNGTerminal();  
+        /*
         PostscriptTerminal t = new PostscriptTerminal(System.getProperty("user.home") +
                 System.getProperty("file.separator") + "Desktop/S0_S1.eps");
         t.setColor(true);
         t.set("solid");
+        */
         p.setTerminal(t);   
         p.setPersist(false);
         p.plot();
         
-        //return t.getImage();
-        return null;
+        return t.getImage();
+        //return null;
 	}
 	
 	//Timestamp OGCMN OGCMX OC OU	PGCMN PGCMX PC PU	YGC YGCT FGC FGCT GCT	NGCMN NGCMX NGC S0C S1C S0U S1U EC EU
@@ -448,7 +567,7 @@ public class JstatMetricsImage {
         lo.setColumns(1); 
         p.getPage().setLayout(lo);
         
-        p.setMultiTitle("Eden Space and New Gen Heap Memory Usage");
+        p.setMultiTitle("Memory Usage of Eden Space and New Gen");
         //p.getAxis("x").setLabel("Time (sec)");//, "Arial", 20);
         p.getAxis("y").setLabel("Memory (MB)");
         p.setKey(Key.TOP_RIGHT);
@@ -504,24 +623,26 @@ public class JstatMetricsImage {
         plot.set("using", "1:16");   
         plot.setTitle("NGCMX");
         plot.getPlotStyle().setStyle(Style.LINES);
-        plot.getPlotStyle().setLineWidth(5);
+        plot.getPlotStyle().setLineWidth(3);
         plot.getPlotStyle().setLineType(1);
         p.addPlot(plot);
         
         p.set("style", "fill transparent solid 1.0 noborder");
         
-        //PNGTerminal t = new PNGTerminal();  
-       
+        PNGTerminal t = new PNGTerminal();  
+        /*
         PostscriptTerminal t = new PostscriptTerminal(System.getProperty("user.home") +
                 System.getProperty("file.separator") + "Desktop/Eden_New.eps");
         t.setColor(true);
+        
         t.set("solid");
+        */
         p.setTerminal(t);   
         p.setPersist(false);
         p.plot();
         
-        //return t.getImage();
-        return null;
+        return t.getImage();
+        //return null;
 	}	
 	
 	public static BufferedImage plotOldGenAndGC(List<ArrayList<String>> list) {
@@ -532,6 +653,85 @@ public class JstatMetricsImage {
 		p.set("style", "data lines");
 		p.set("xtics", "nomirror");	
 		p.set("format", "x '%M:%S'");
+		//p.set("lmargin", "9");
+		//p.set("rmargin", "0.1");
+
+        //AutoGraphLayout lo = new AutoGraphLayout();
+		//StripeLayout lo = new StripeLayout();
+		//lo.setColumns(1); 
+        //p.getPage().setLayout(lo);
+        
+        p.setTitle("Memory Usage of Old Generation");
+        p.getAxis("x").setLabel("Time (MM:SS)");//, "Arial", 20);
+        p.getAxis("y").setLabel("Memory (MB)");
+        p.setKey(Key.TOP_RIGHT);
+		
+		
+
+        GenericDataSet dataSet = new GenericDataSet(true);
+        dataSet.addAll(list);
+
+        DataSetPlot plot = new DataSetPlot(dataSet);
+        plot.set("using", "1:4");   
+        //plot.set("using", "1:4:(" + rgb(50,204,50) + ")");   
+        plot.setTitle("OC");
+        plot.getPlotStyle().setStyle(Style.FILLEDCURVES);
+        plot.getPlotStyle().set("y1=0");
+        plot.getPlotStyle().set("lc", "rgb '" + rgb(50,204,50) + "'");
+        p.addPlot(plot);            
+        
+        plot = new DataSetPlot(dataSet);
+        //plot.set("using", "1:5:(" + rgb(85,84,202) + ")");
+        plot.set("using", "1:5");
+        plot.setTitle("OU");
+        plot.getPlotStyle().setStyle(Style.FILLEDCURVES);
+        plot.getPlotStyle().set("y1=0");
+        plot.getPlotStyle().set("lc", "rgb '" + rgb(85,84,202) + "'");
+        p.addPlot(plot); 
+        
+        plot = new DataSetPlot(dataSet);
+        plot.set("using", "1:2");   
+        plot.setTitle("OGCMN");
+        plot.getPlotStyle().setStyle(Style.LINES);
+        plot.getPlotStyle().setLineType(6);
+        plot.getPlotStyle().set("lc", "rgb 'green'");
+        p.addPlot(plot);
+        
+        plot = new DataSetPlot(dataSet);
+        plot.set("using", "1:3");   
+        plot.setTitle("OGCMX");
+        plot.getPlotStyle().setStyle(Style.LINES);
+        plot.getPlotStyle().setLineWidth(3);
+        plot.getPlotStyle().set("lc", "rgb 'red'");
+        p.addPlot(plot);
+        
+        p.set("style", "fill transparent solid 1.0 noborder");
+       
+        PNGTerminal t = new PNGTerminal();  
+        /*
+        PostscriptTerminal t = new PostscriptTerminal(System.getProperty("user.home") +
+                System.getProperty("file.separator") + "Desktop/Old.eps");
+        t.setColor(true);
+        t.set("solid");
+        */
+        p.setTerminal(t);   
+        p.setPersist(false);
+        p.plot();
+        
+        return t.getImage();
+        //return null;
+	}
+	
+	public static BufferedImage plotOldGenAndGC2(List<ArrayList<String>> list) {
+		JavaPlot p = new JavaPlot();
+		//JavaPlot.getDebugger().setLevel(Debug.VERBOSE);
+        p.set("xdata", "time");
+		p.set("timefmt", "'%H:%M:%S'");
+		p.set("style", "data lines");
+		p.set("xtics", "nomirror");	
+		p.set("format", "x '%M:%S'");
+		p.set("lmargin", "9");
+		//p.set("rmargin", "0.1");
 		
         //AutoGraphLayout lo = new AutoGraphLayout();
 		StripeLayout lo = new StripeLayout();
@@ -603,17 +803,19 @@ public class JstatMetricsImage {
         
         p.set("style", "fill transparent solid 1.0 noborder");
        
-        //PNGTerminal t = new PNGTerminal();  
+        PNGTerminal t = new PNGTerminal();  
+        /*
         PostscriptTerminal t = new PostscriptTerminal(System.getProperty("user.home") +
                 System.getProperty("file.separator") + "Desktop/Old.eps");
         t.setColor(true);
         t.set("solid");
+        */
         p.setTerminal(t);   
         p.setPersist(false);
         p.plot();
         
-        //return t.getImage();
-        return null;
+        return t.getImage();
+        //return null;
 	}
 		
 	public static String rgb(int r, int g, int b) {
